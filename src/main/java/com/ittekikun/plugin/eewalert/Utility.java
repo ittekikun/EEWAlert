@@ -1,26 +1,26 @@
 package com.ittekikun.plugin.eewalert;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import twitter4j.TwitterException;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 public class Utility
@@ -180,11 +180,10 @@ public class Utility
      * jarファイルの中に格納されているフォルダを、中のファイルごとまとめてjarファイルの外にコピーするメソッド<br/>
      * テキストファイルは、そのままコピーされます。
      *
-     * @author https://github.com/ucchyocean/
-     *
      * @param jarFile        jarファイル
      * @param targetFilePath コピー先のフォルダ
      * @param sourceFilePath コピー元のフォルダ
+     * @author https://github.com/ucchyocean/
      */
     public static void copyRawFolderFromJar(File jarFile, File targetFilePath, String sourceFilePath)
     {
@@ -214,7 +213,7 @@ public class Utility
                         targetFile.getParentFile().mkdirs();
                     }
 
-                    if(!targetFile.exists())
+                    if (!targetFile.exists())
                     {
                         targetFile.mkdir();
                     }
@@ -281,11 +280,10 @@ public class Utility
      * jarファイルの中に格納されているテキストファイルを、jarファイルの外にコピーするメソッド<br/>
      * WindowsだとS-JISで、MacintoshやLinuxだとUTF-8で保存されます。
      *
-     * @author https://github.com/ucchyocean/
-     *
      * @param jarFile        jarファイル
      * @param targetFile     コピー先
      * @param sourceFilePath コピー元
+     * @author https://github.com/ucchyocean/
      */
     public static void copyFileFromJar(File jarFile, File targetFile, String sourceFilePath)
     {
@@ -396,11 +394,10 @@ public class Utility
      * jarファイルの中に格納されているフォルダを、中のファイルごとまとめてjarファイルの外にコピーするメソッド<br/>
      * テキストファイルは、WindowsだとS-JISで、MacintoshやLinuxだとUTF-8で保存されます。
      *
-     * @author https://github.com/ucchyocean/
-     *
      * @param jarFile        jarファイル
      * @param targetFilePath コピー先のフォルダ
      * @param sourceFilePath コピー元のフォルダ
+     * @author https://github.com/ucchyocean/
      */
     public static void copyFolderFromJar(File jarFile, File targetFilePath, String sourceFilePath)
     {
@@ -430,7 +427,7 @@ public class Utility
                         targetFile.getParentFile().mkdirs();
                     }
 
-                    if(!targetFile.exists())
+                    if (!targetFile.exists())
                     {
                         targetFile.mkdir();
                     }
@@ -541,9 +538,9 @@ public class Utility
 
     /**
      * 文字列が整数値に変換可能かどうかを判定する
+     *
      * @param source 変換対象の文字列
      * @return 整数に変換可能かどうか
-     *
      * @author https://github.com/ucchyocean/
      */
     public static boolean checkIntParse(String source)
@@ -553,85 +550,85 @@ public class Utility
     }
 
 
-//    /**
-//     * メッセージをユニキャスト
-//     *
-//     * @param message メッセージ
-//     */
-//    public static void message(CommandSender sender, String message)
-//    {
-//        if (sender != null && message != null)
-//        {
-//            sender.sendMessage(MineTweet.prefix + message.replaceAll("&([0-9a-fk-or])", "\u00A7$1"));
-//        }
-//    }
-//
-//    /**
-//     * メッセージをブロードキャスト
-//     *
-//     * @param message メッセージ
-//     */
-//    public static void broadcastMessage(String message)
-//    {
-//        if (message != null)
-//        {
-//            message = message.replaceAll("&([0-9a-fk-or])", "\u00A7$1");
-//            Bukkit.broadcastMessage(MineTweet.prefix + message);
-//        }
-//    }
-//
-//    /**
-//     * メッセージをワールドキャスト
-//     *
-//     * @param world
-//     * @param message
-//     */
-//    public static void worldcastMessage(World world, String message)
-//    {
-//        if (world != null && message != null)
-//        {
-//            message = message.replaceAll("&([0-9a-fk-or])", "\u00A7$1");
-//            for (Player player : world.getPlayers())
-//            {
-//                player.sendMessage(MineTweet.prefix + message);
-//            }
-//            MineTweet.log.info(MineTweet.prefix + "[Worldcast][" + world.getName() + "]: " + message);
-//        }
-//    }
-//
-//    /**
-//     * メッセージをパーミッションキャスト(指定した権限ユーザにのみ送信)
-//     *
-//     * @param permission 受信するための権限ノード
-//     * @param message    メッセージ
-//     */
-//    public static void permcastMessage(String permission, String message)
-//    {
-//        // OK
-//        int i = 0;
-//        for (Player player : Bukkit.getServer().getOnlinePlayers())
-//        {
-//            if (player.hasPermission(permission))
-//            {
-//                Utility.message(player, message);
-//                i++;
-//            }
-//        }
-//
-//        MineTweet.log.info(MineTweet.prefix + "Received " + i + "players: " + message);
-//    }
-//
-//    public static Player getPlayer(String name)
-//    {
-//        for (Player player : getOnlinePlayers())
-//        {
-//            if(player.getName().equals(name))
-//            {
-//                return player;
-//            }
-//        }
-//        return null;
-//    }
+    //    /**
+    //     * メッセージをユニキャスト
+    //     *
+    //     * @param message メッセージ
+    //     */
+    //    public static void message(CommandSender sender, String message)
+    //    {
+    //        if (sender != null && message != null)
+    //        {
+    //            sender.sendMessage(MineTweet.prefix + message.replaceAll("&([0-9a-fk-or])", "\u00A7$1"));
+    //        }
+    //    }
+    //
+    //    /**
+    //     * メッセージをブロードキャスト
+    //     *
+    //     * @param message メッセージ
+    //     */
+    //    public static void broadcastMessage(String message)
+    //    {
+    //        if (message != null)
+    //        {
+    //            message = message.replaceAll("&([0-9a-fk-or])", "\u00A7$1");
+    //            Bukkit.broadcastMessage(MineTweet.prefix + message);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * メッセージをワールドキャスト
+    //     *
+    //     * @param world
+    //     * @param message
+    //     */
+    //    public static void worldcastMessage(World world, String message)
+    //    {
+    //        if (world != null && message != null)
+    //        {
+    //            message = message.replaceAll("&([0-9a-fk-or])", "\u00A7$1");
+    //            for (Player player : world.getPlayers())
+    //            {
+    //                player.sendMessage(MineTweet.prefix + message);
+    //            }
+    //            MineTweet.log.info(MineTweet.prefix + "[Worldcast][" + world.getName() + "]: " + message);
+    //        }
+    //    }
+    //
+    //    /**
+    //     * メッセージをパーミッションキャスト(指定した権限ユーザにのみ送信)
+    //     *
+    //     * @param permission 受信するための権限ノード
+    //     * @param message    メッセージ
+    //     */
+    //    public static void permcastMessage(String permission, String message)
+    //    {
+    //        // OK
+    //        int i = 0;
+    //        for (Player player : Bukkit.getServer().getOnlinePlayers())
+    //        {
+    //            if (player.hasPermission(permission))
+    //            {
+    //                Utility.message(player, message);
+    //                i++;
+    //            }
+    //        }
+    //
+    //        MineTweet.log.info(MineTweet.prefix + "Received " + i + "players: " + message);
+    //    }
+    //
+    //    public static Player getPlayer(String name)
+    //    {
+    //        for (Player player : getOnlinePlayers())
+    //        {
+    //            if(player.getName().equals(name))
+    //            {
+    //                return player;
+    //            }
+    //        }
+    //        return null;
+    //    }
 
     /**
      * @return 接続中の全てのプレイヤー
@@ -649,8 +646,7 @@ public class Utility
             {
                 Collection<?> temp = ((Collection<?>) Bukkit.class.getMethod("getOnlinePlayers", new Class<?>[0]).invoke(null, new Object[0]));
                 return new ArrayList<Player>((Collection<? extends Player>) temp);
-            }
-            else
+            } else
             {
                 Player[] temp = ((Player[]) Bukkit.class.getMethod("getOnlinePlayers", new Class<?>[0]).invoke(null, new Object[0]));
                 ArrayList<Player> players = new ArrayList<Player>();
@@ -679,6 +675,7 @@ public class Utility
     /**
      * 指定したプレイヤーが手に持っているアイテムを返します。
      * CB1.9以降と、CB1.8.8以前で、互換性を保つために使用します。
+     *
      * @param player プレイヤー
      * @return 手に持っているアイテム
      */
@@ -688,10 +685,51 @@ public class Utility
         if (EEWAlert.isV19)
         {
             return player.getInventory().getItemInMainHand();
-        }
-        else
+        } else
         {
             return player.getItemInHand();
         }
+    }
+
+    /**
+     * 短縮URL生成
+     *
+     * @param longUrl
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    @SuppressWarnings("resource")
+    public static String getShortUrl(String longUrl) throws ClientProtocolException, IOException
+    {
+        HttpPost post = new HttpPost("https://www.googleapis.com/urlshortener/v1/url?key=" + ConsumerKey.g_APIKey);
+        post.setHeader("Content-Type", "application/json");
+        post.setEntity(new StringEntity("{'longUrl': '"+longUrl+"'}", "UTF-8"));
+
+        HttpResponse response = new DefaultHttpClient().execute(post);
+
+        String responseText = EntityUtils.toString(response.getEntity());
+
+        // JsonFactoryの生成
+        JsonFactory factory = new JsonFactory();
+        // JsonParserの取得
+        @SuppressWarnings("deprecation")
+        JsonParser parser = factory.createJsonParser(responseText);
+
+        //JSONのパース処理
+        String shotUrl = "";
+        while (parser.nextToken() != JsonToken.END_OBJECT)
+        {
+            String name = parser.getCurrentName();
+            if (name != null)
+            {
+                parser.nextToken();
+                if (name.equals("id"))
+                {
+                    shotUrl = parser.getText();
+                }
+            }
+        }
+        return shotUrl;
     }
 }

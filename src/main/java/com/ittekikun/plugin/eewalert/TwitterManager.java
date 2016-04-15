@@ -7,11 +7,13 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.awt.*;
+import java.awt.List;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.*;
 
 public class TwitterManager
 {
@@ -23,7 +25,7 @@ public class TwitterManager
 
     public TwitterManager(EEWAlert eewAlert)
     {
-        eewAlert = this.eewAlert;
+        this.eewAlert = eewAlert;
     }
 
     public void startSetup()
@@ -42,7 +44,7 @@ public class TwitterManager
         //初期起動時(ファイルなし)
         if(accesstoken == null)
         {
-
+            startSetupGuide();
         }
         //ファイル有り
         else
@@ -157,5 +159,37 @@ public class TwitterManager
     {
         String s = eewAlert.getDataFolder() + "/AccessToken.yml";
         return new File(s);
+    }
+
+    void startSetupGuide()
+    {
+        java.util.List<String> firstMes = new ArrayList<String>();
+
+
+        firstMes.add("#################################################");
+        firstMes.add("[[[[ Twitter連携ウィザード EEWAlert by ittekikun ]]]]");
+        firstMes.add("EEWAlertのTwitter連携設定がされてません。");
+        firstMes.add("下記URLから認証後、PINコードを /eew pin <pin> の様に打ち込み連携を完了して下さい。");
+        try
+        {
+            firstMes.add("URL: " + Utility.getShortUrl(createOAuthUrl().toString()));
+            //firstMes.add("URL: " + createOAuthUrl().toString());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            eewAlert.log.severe("短縮URLの生成に失敗しました。");
+        }
+        firstMes.add("#################################################");
+
+        infoList(firstMes);
+    }
+
+    void infoList(java.util.List<String> list)
+    {
+        for(int i = 0; i < list.size(); ++i)
+        {
+            eewAlert.log.info(list.get(i).toString());
+        }
     }
 }

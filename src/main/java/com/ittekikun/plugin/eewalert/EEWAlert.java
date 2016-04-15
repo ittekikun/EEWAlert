@@ -13,6 +13,9 @@ public class EEWAlert  extends JavaPlugin
     public static PluginManager pluginManager;
     public static boolean forceDisableMode;
 
+    public TwitterManager twitterManager;
+    public WizardManager wizardManager;
+
 
     public static boolean isV19;
 
@@ -40,6 +43,10 @@ public class EEWAlert  extends JavaPlugin
             return;
         }
 
+        //wizardManager = new WizardManager(this , twitterManager);
+        twitterManager = new TwitterManager(this);
+
+        twitterManager.startSetup();
     }
 
     @Override
