@@ -21,8 +21,8 @@
     <orderEntry type="library" name="Maven: org.avaje:ebean:2.8.1" level="project" />
     <orderEntry type="library" name="Maven: javax.persistence:persistence-api:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.15" level="project" />
-    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-core:4.0.3-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-stream:4.0.3-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-async:4.0.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-core:4.0.4" level="project" />
+    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-stream:4.0.4" level="project" />
+    <orderEntry type="library" name="Maven: org.twitter4j:twitter4j-async:4.0.4" level="project" />
   </component>
 </module>
