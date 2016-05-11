@@ -22,6 +22,7 @@ public class TwitterManager
     public TwitterStream eewStream;
     //public MineTweetConfig mtConfig;
     public AccessToken accesstoken;
+    public APIKey apiKey;
 
     public TwitterManager(EEWAlert eewAlert)
     {
@@ -32,8 +33,8 @@ public class TwitterManager
     {
         ConfigurationBuilder builder = new ConfigurationBuilder();
 
-        builder.setOAuthConsumerKey(ConsumerKey.m_ConsumerKey);
-        builder.setOAuthConsumerSecret(ConsumerKey.m_ConsumerSecret);
+        builder.setOAuthConsumerKey(apiKey.getRubbish());
+        builder.setOAuthConsumerSecret(apiKey.getRubbish());
         Configuration conf = builder.build();
 
         twitter = new TwitterFactory(conf).getInstance();

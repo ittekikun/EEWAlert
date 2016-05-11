@@ -3,6 +3,7 @@ package com.ittekikun.plugin.eewalert;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
@@ -25,6 +26,7 @@ import java.util.zip.ZipEntry;
 
 public class Utility
 {
+
 
     /**
      * ArrayUnion
@@ -700,9 +702,9 @@ public class Utility
      * @throws IOException
      */
     @SuppressWarnings("resource")
-    public static String getShortUrl(String longUrl) throws ClientProtocolException, IOException
+    public static String getShortUrl(String longUrl, String apikey) throws ClientProtocolException, IOException
     {
-        HttpPost post = new HttpPost("https://www.googleapis.com/urlshortener/v1/url?key=" + ConsumerKey.g_APIKey);
+        HttpPost post = new HttpPost("https://www.googleapis.com/urlshortener/v1/url?key=" + apikey);
         post.setHeader("Content-Type", "application/json");
         post.setEntity(new StringEntity("{'longUrl': '"+longUrl+"'}", "UTF-8"));
 
@@ -731,5 +733,23 @@ public class Utility
             }
         }
         return shotUrl;
+    }
+
+    public APIKey readAPIKey(File file) throws IOException, ClassNotFoundException
+    {
+        FileInputStream fii = new FileInputStream(file);
+        byte[] indata = new byte[(int)file.length()];
+        fii.read(indata);
+        fii.close();
+
+        byte[] outdata = Base64.decodeBase64(indata);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(outdata);
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        APIKey apiKey = (APIKey)ois.readObject();
+        bais.close();
+        ois.close();
+
+        return apiKey;
     }
 }
