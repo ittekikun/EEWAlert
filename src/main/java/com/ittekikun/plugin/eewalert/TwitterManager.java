@@ -6,14 +6,9 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
-import java.awt.*;
-import java.awt.List;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
 
 public class TwitterManager
 {
@@ -166,7 +161,6 @@ public class TwitterManager
     void startSetupGuide()
     {
         java.util.List<String> firstMes = new ArrayList<String>();
-
 
         firstMes.add("#################################################");
         firstMes.add("[[[[ Twitter連携ウィザード EEWAlert by ittekikun ]]]]");
