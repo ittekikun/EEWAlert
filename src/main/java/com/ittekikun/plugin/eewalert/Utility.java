@@ -735,7 +735,7 @@ public class Utility
         return shotUrl;
     }
 
-    public APIKey readAPIKey(File file) throws IOException, ClassNotFoundException
+    public static APIKey decodeAPIKey(File file) throws IOException, ClassNotFoundException
     {
         FileInputStream fii = new FileInputStream(file);
         byte[] indata = new byte[(int)file.length()];

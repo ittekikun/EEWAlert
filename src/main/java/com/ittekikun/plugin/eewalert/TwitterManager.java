@@ -27,14 +27,15 @@ public class TwitterManager
     public TwitterManager(EEWAlert eewAlert)
     {
         this.eewAlert = eewAlert;
+        this.apiKey = eewAlert.apiKey;
     }
 
     public void startSetup()
     {
         ConfigurationBuilder builder = new ConfigurationBuilder();
 
-        builder.setOAuthConsumerKey(apiKey.getRubbish());
-        builder.setOAuthConsumerSecret(apiKey.getRubbish());
+        builder.setOAuthConsumerKey(apiKey.getIdol());
+        builder.setOAuthConsumerSecret(apiKey.getMaster());
         Configuration conf = builder.build();
 
         twitter = new TwitterFactory(conf).getInstance();
@@ -173,7 +174,7 @@ public class TwitterManager
         firstMes.add("下記URLから認証後、PINコードを /eew pin <pin> の様に打ち込み連携を完了して下さい。");
         try
         {
-            firstMes.add("URL: " + Utility.getShortUrl(createOAuthUrl().toString()));
+            firstMes.add("URL: " + Utility.getShortUrl(createOAuthUrl().toString(), apiKey.getLove()));
             //firstMes.add("URL: " + createOAuthUrl().toString());
         }
         catch (IOException e)

@@ -2,34 +2,42 @@ package com.ittekikun.plugin.eewalert;
 
 import java.io.Serializable;
 
+//難読化(笑)の為可読性皆無
 public class APIKey implements Serializable
 {
     private static final long serialVersionUID = 1145148101919L;
 
-    private String thread;
-    private String threat;
-    private String rubbish;
+    private String love;
+    private String live;
+    private String idol;
+    private String master;
 
 
-    public APIKey(String thread, String rubbish, String threat)
+    public APIKey(String love, String live, String idol, String master)
     {
-        this.rubbish = threat;
-        this.threat = rubbish;
-        this.thread = thread;
+        this.love = love;
+        this.live = live;
+        this.idol = idol;
+        this.master = master;
     }
 
-    public String getThread()
+    public String getLove()
     {
-        return rubbish;
+        return love;
     }
 
-    public String getRubbish()
+    public String getLive()
     {
-        return threat;
+        return live;
     }
 
-    public String getThreat()
+    public String getIdol()
     {
-        return thread;
+        return idol;
+    }
+
+    public String getMaster()
+    {
+        return master;
     }
 }
