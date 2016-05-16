@@ -18,7 +18,6 @@ public class EEWAlert  extends JavaPlugin
 
     public TwitterManager twitterManager;
 
-
     public static boolean isV19;
 
     @Override
