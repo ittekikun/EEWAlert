@@ -15,9 +15,13 @@ public class TwitterManager
     public EEWAlert eewAlert;
     public Twitter twitter;
     public TwitterStream eewStream;
-    //public MineTweetConfig mtConfig;
-    public AccessToken accesstoken;
+    //public EEWAlertConfig erConfig;
+    //public AccessToken accesstoken;
+    public RequestToken requestToken;
     public APIKey apiKey;
+
+    public boolean canTweet = false;
+    public boolean canAuth = false;
 
     public TwitterManager(EEWAlert eewAlert)
     {
@@ -33,27 +37,32 @@ public class TwitterManager
         builder.setOAuthConsumerSecret(apiKey.getMaster());
         Configuration conf = builder.build();
 
+        AccessToken accessToken = null;
+
         twitter = new TwitterFactory(conf).getInstance();
         eewStream = new TwitterStreamFactory(conf).getInstance();
 
-        accesstoken = loadAccessToken();
+        accessToken = loadAccessToken();
 
         //初期起動時(ファイルなし)
-        if(accesstoken == null)
+        if(accessToken == null)
         {
             startSetupGuide();
         }
         //ファイル有り
         else
         {
-            twitter.setOAuthAccessToken(accesstoken);
-            eewStream.setOAuthAccessToken(accesstoken);
+            twitter.setOAuthAccessToken(accessToken);
+            eewStream.setOAuthAccessToken(accessToken);
+
+            startRecieveStream();
+
+            canTweet = true;
         }
     }
 
     public URL createOAuthUrl()
     {
-        RequestToken requestToken = null;
         URL url = null;
 
         try
@@ -91,7 +100,8 @@ public class TwitterManager
         }
         finally
         {
-            if(is != null){
+            if(is != null)
+            {
                 try
                 {
                     is.close();
@@ -104,11 +114,11 @@ public class TwitterManager
         }
     }
 
-    public AccessToken getAccessToken(RequestToken  requesttoken,String pin) throws TwitterException
+    public AccessToken getAccessToken(String pin) throws TwitterException
     {
         AccessToken accessToken = null;
 
-        accessToken = twitter.getOAuthAccessToken(requesttoken, pin);
+        accessToken = twitter.getOAuthAccessToken(requestToken, pin);
 
         return accessToken;
     }
@@ -166,19 +176,22 @@ public class TwitterManager
         firstMes.add("[[[[ Twitter連携ウィザード EEWAlert by ittekikun ]]]]");
         firstMes.add("EEWAlertのTwitter連携設定がされてません。");
         firstMes.add("下記URLから認証後、PINコードを /eew pin <pin> の様に打ち込み連携を完了して下さい。");
+        //firstMes.add("※");
         try
         {
             firstMes.add("URL: " + Utility.getShortUrl(createOAuthUrl().toString(), apiKey.getLove()));
-            //firstMes.add("URL: " + createOAuthUrl().toString());
+            //firstMes.add("URL: " + (createOAuthUrl().toString()));
         }
         catch (IOException e)
         {
             e.printStackTrace();
-            eewAlert.log.severe("短縮URLの生成に失敗しました。");
+            eewAlert.log.severe("認証URLの生成に失敗しました。");
+            return;
         }
         firstMes.add("#################################################");
 
         infoList(firstMes);
+        canAuth = true;
     }
 
     void infoList(java.util.List<String> list)
@@ -187,5 +200,21 @@ public class TwitterManager
         {
             eewAlert.log.info(list.get(i).toString());
         }
+    }
+
+    public void startRecieveStream()
+    {
+        eewStream.addListener(new EEWStream(eewAlert));
+        eewStream.user();
+
+        //214358709 = @eewbot
+        long[] list = {214358709L};
+        FilterQuery query = new FilterQuery(list);
+        eewStream.filter(query);
+    }
+
+    public void shutdownRecieveStream()
+    {
+        eewStream.shutdown();
     }
 }

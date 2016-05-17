@@ -1,3 +1,7 @@
 name: EEWAlert
 main: com.ittekikun.plugin.eewalert.EEWAlert
 version: 1.0.0
+commands:
+   eew:
+      description: This is a EEWAlert command.
+      usage: /eew <command> [args]

@@ -735,12 +735,18 @@ public class Utility
         return shotUrl;
     }
 
-    public static APIKey decodeAPIKey(File file) throws IOException, ClassNotFoundException
+    public static APIKey decodeAPIKey(File file, String fileName) throws IOException, ClassNotFoundException
     {
-        FileInputStream fii = new FileInputStream(file);
-        byte[] indata = new byte[(int)file.length()];
-        fii.read(indata);
-        fii.close();
+        InputStream is;
+        JarFile jar;
+
+        jar = new JarFile(file);
+        ZipEntry zipEntry = jar.getEntry(fileName);
+        is = jar.getInputStream(zipEntry);
+
+        byte[] indata = new byte[(int)zipEntry.getSize()];
+        is.read(indata);
+        is.close();
 
         byte[] outdata = Base64.decodeBase64(indata);
 

@@ -1,11 +1,18 @@
 package com.ittekikun.plugin.eewalert;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import twitter4j.TwitterException;
+import twitter4j.auth.AccessToken;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import static com.ittekikun.plugin.eewalert.Messenger.MessageType.SEVERE;
+import static com.ittekikun.plugin.eewalert.Messenger.MessageType.WARNING;
 
 public class EEWAlert  extends JavaPlugin
 {
@@ -15,7 +22,6 @@ public class EEWAlert  extends JavaPlugin
     public static final String prefix = "[EEWAlert] ";
     public static PluginManager pluginManager;
     public static boolean forceDisableMode;
-
     public TwitterManager twitterManager;
 
     public static boolean isV19;
@@ -52,17 +58,9 @@ public class EEWAlert  extends JavaPlugin
 
     public APIKey loadAPIkey()
     {
-        File file = new File(this.getDataFolder(),"apikey.dat");
-
-        if(!file.exists())
-        {
-            Utility.copyRawFileFromJar(getPluginJarFile(), file, "apikey");
-        }
-
         try
         {
-            Utility.decodeAPIKey(file);
-            return Utility.decodeAPIKey(file);
+            return Utility.decodeAPIKey(getPluginJarFile(), "apikey");
         }
         catch (IOException e)
         {
@@ -76,8 +74,88 @@ public class EEWAlert  extends JavaPlugin
     }
 
     @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
+    {
+        AccessToken accessToken;
+
+        if (cmd.getName().equalsIgnoreCase("eew"))
+        {
+            if (args[0].equalsIgnoreCase("pin"))
+            {
+                if(twitterManager.canAuth)
+                {
+                    if(Utility.checkIntParse(args[1]))
+                    {
+                        if(args[1].length() == 7)
+                        {
+                            try
+                            {
+                                accessToken = twitterManager.getAccessToken(args[1]);
+
+                                twitterManager.storeAccessToken(accessToken);
+                                twitterManager.startSetup();
+                            }
+                            catch (TwitterException e)
+                            {
+                                e.printStackTrace();
+                                Messenger.messageToSender(sender, SEVERE, "正しく認証されませんでした。");
+                                Messenger.messageToSender(sender, SEVERE, "お手数ですがもう一度お試し下さい。");
+                            }
+                            return true;
+                        }
+                        else
+                        {
+                            Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(数値が8字以上入力されています。)");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(整数値に変換できません。)");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(認証時のみ使用)");
+                    return false;
+                }
+            }
+            else if(args[0].equalsIgnoreCase("test"))
+            {
+                if(twitterManager.canTweet)
+                {
+                    try
+                    {
+                        twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
+                        return true;
+                    }
+                    catch (TwitterException e)
+                    {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
+                else
+                {
+                    Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(認証されていません。)");
+                    return false;
+                }
+            }
+            else
+            {
+                Messenger.messageToSender(sender, WARNING, "引数がありません。");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public void onDisable()
     {
+        twitterManager.shutdownRecieveStream();
+
         if(forceDisableMode)
         {
             return;
