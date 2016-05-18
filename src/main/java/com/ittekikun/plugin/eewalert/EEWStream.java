@@ -14,8 +14,7 @@ public class EEWStream implements UserStreamListener
     @Override
     public void onStatus(Status status)
     {
-        //TODO false
-        if((status.isRetweet()))
+        if(!(status.isRetweet()))
         {
             String array[] = status.getText().split(",", 0);
 

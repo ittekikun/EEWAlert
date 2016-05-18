@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import twitter4j.TwitterException;
@@ -89,10 +90,15 @@ public class EEWAlert  extends JavaPlugin
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
     {
-        AccessToken accessToken;
-
         if (cmd.getName().equalsIgnoreCase("eew"))
         {
+            if(args.length == 0)
+            {
+                Messenger.messageToSender(sender, WARNING, "引数がありません。");
+                help(sender);
+                return false;
+            }
+
             if (args[0].equalsIgnoreCase("pin"))
             {
                 if(twitterManager.canAuth)
@@ -101,13 +107,14 @@ public class EEWAlert  extends JavaPlugin
                     {
                         if(args[1].length() == 7)
                         {
+                            AccessToken accessToken;
                             try
                             {
                                 accessToken = twitterManager.getAccessToken(args[1]);
 
                                 twitterManager.storeAccessToken(accessToken);
-                                twitterManager.startSetup();
                                 Messenger.messageToSender(sender, INFO, "Twitterと正しく認証されました。");
+                                twitterManager.startSetup();
                             }
                             catch (TwitterException e)
                             {
@@ -135,7 +142,7 @@ public class EEWAlert  extends JavaPlugin
                     return false;
                 }
             }
-            else if(args[0].equalsIgnoreCase("test"))
+            else if(args[0].equalsIgnoreCase("tweet"))
             {
                 if(twitterManager.canTweet)
                 {
@@ -150,19 +157,36 @@ public class EEWAlert  extends JavaPlugin
                         return false;
                     }
                 }
-                else
-                {
-                    Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(認証されていません。)");
-                    return false;
-                }
             }
-            else
+            else if(args[0].equalsIgnoreCase("help"))
             {
-                Messenger.messageToSender(sender, WARNING, "引数がありません。");
-                return false;
+                help(sender);
+            }
+            else if(args[0].equalsIgnoreCase("reload"))
+            {
+                twitterManager.shutdownRecieveStream();
+                HandlerList.unregisterAll(this);
+
+                eewAlertConfig.loadConfig();
+
+                if(eewAlertConfig.versionCheck)
+                {
+                    pluginManager.registerEvents(new VersionCheckListener(this), this);
+                }
+                twitterManager.startRecieveStream();
             }
         }
-        return true;
+        return false;
+    }
+
+    public void help(CommandSender sender)
+    {
+        Messenger.messageToSender(sender, INFO, "[[[[[ヘルプコマンド]]]]");
+        Messenger.messageToSender(sender, INFO, "現在使えるコマンドは以下の通りです。");
+        Messenger.messageToSender(sender, INFO, "/eew pin <pin>    ※認証時のみ使用します。");
+        Messenger.messageToSender(sender, INFO, "/eew reload       ※設定ファイルを再読み込みします。");
+        Messenger.messageToSender(sender, INFO, "/eew tweet <text> ※textの内容をツイートします。");
+        Messenger.messageToSender(sender, INFO, "/eew help         ※helpを表示します。");
     }
 
     @Override

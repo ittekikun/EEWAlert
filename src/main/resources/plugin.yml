@@ -4,4 +4,3 @@ version: 0.9
 commands:
    eew:
       description: This is a EEWAlert command.
-      usage: /eew <command> [args]

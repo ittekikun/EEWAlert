@@ -205,7 +205,7 @@ public class TwitterManager
         eewStream.addListener(new EEWStream(eewAlert));
         eewStream.user();
 
-        EEWAlert.log.info("ユーザーストリームに接続しました。");
+        EEWAlert.log.info("ユーザーストリームに接続します。");
 
         //214358709 = @eewbot
         long[] list = {214358709L};
@@ -216,7 +216,6 @@ public class TwitterManager
     public void shutdownRecieveStream()
     {
         eewStream.shutdown();
-        //TODO koko
-        //EEWAlert.log.info("ユーザーストリームから切断しました。。");
+        EEWAlert.log.info("ユーザーストリームから切断しました。");
     }
 }

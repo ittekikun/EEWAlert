@@ -24,9 +24,6 @@ public class VersionCheckListener implements Listener
         {
             double NowVer = Double.valueOf(plugin.getServer().getPluginManager().getPlugin("EEWAlert").getDescription().getVersion());
 
-            //いつかUTF8に対応したいなって（動作確認済み）
-            //↓
-            //1.4より移行
             String url = "EEWAlert";
 
             Thread updateCheck = new Thread(new UpdateCheck(player,url,NowVer));
