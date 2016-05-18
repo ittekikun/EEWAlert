@@ -4,23 +4,24 @@ import twitter4j.*;
 
 public class EEWStream implements UserStreamListener
 {
-    //public MineTweetConfig mtConfig;
+    public EEWAlert eewAlert;
 
     public EEWStream(EEWAlert eewAlert)
     {
-        //this.mtConfig = mtConfig;
+        this.eewAlert = eewAlert;
     }
 
     @Override
     public void onStatus(Status status)
     {
-        if(status.getUser().getId() == 214358709L && !(status.isRetweet()))
+        //TODO false
+        if((status.isRetweet()))
         {
             String array[] = status.getText().split(",", 0);
 
             EEW eew = new EEW(array);
 
-            NoticeBuilder.noticeEewMessage(eew);
+            eewAlert.noticeEewMessage(eew);
         }
     }
 

@@ -15,8 +15,6 @@ public class TwitterManager
     public EEWAlert eewAlert;
     public Twitter twitter;
     public TwitterStream eewStream;
-    //public EEWAlertConfig erConfig;
-    //public AccessToken accesstoken;
     public RequestToken requestToken;
     public APIKey apiKey;
 
@@ -164,7 +162,7 @@ public class TwitterManager
 
     public File createAccessTokenFileName()
     {
-        String s = eewAlert.getDataFolder() + "/AccessToken.yml";
+        String s = eewAlert.getDataFolder() + "/AccessToken.dat";
         return new File(s);
     }
 
@@ -207,6 +205,8 @@ public class TwitterManager
         eewStream.addListener(new EEWStream(eewAlert));
         eewStream.user();
 
+        EEWAlert.log.info("ユーザーストリームに接続しました。");
+
         //214358709 = @eewbot
         long[] list = {214358709L};
         FilterQuery query = new FilterQuery(list);
@@ -216,5 +216,7 @@ public class TwitterManager
     public void shutdownRecieveStream()
     {
         eewStream.shutdown();
+        //TODO koko
+        //EEWAlert.log.info("ユーザーストリームから切断しました。。");
     }
 }

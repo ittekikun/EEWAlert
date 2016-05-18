@@ -1,5 +1,7 @@
 package com.ittekikun.plugin.eewalert;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
@@ -9,10 +11,13 @@ import twitter4j.auth.AccessToken;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
-import static com.ittekikun.plugin.eewalert.Messenger.MessageType.SEVERE;
-import static com.ittekikun.plugin.eewalert.Messenger.MessageType.WARNING;
+import static com.ittekikun.plugin.eewalert.EEW.AlarmType.ADVANCED;
+import static com.ittekikun.plugin.eewalert.EEW.AlarmType.GENERAL;
+import static com.ittekikun.plugin.eewalert.Messenger.MessageType.*;
 
 public class EEWAlert  extends JavaPlugin
 {
@@ -23,6 +28,7 @@ public class EEWAlert  extends JavaPlugin
     public static PluginManager pluginManager;
     public static boolean forceDisableMode;
     public TwitterManager twitterManager;
+    public EEWAlertConfig eewAlertConfig;
 
     public static boolean isV19;
 
@@ -49,6 +55,13 @@ public class EEWAlert  extends JavaPlugin
 
             return;
         }
+        eewAlertConfig = new EEWAlertConfig(this);
+        eewAlertConfig.loadConfig();
+
+        if(eewAlertConfig.versionCheck)
+        {
+            pluginManager.registerEvents(new VersionCheckListener(this), this);
+        }
 
         apiKey = loadAPIkey();
 
@@ -60,7 +73,7 @@ public class EEWAlert  extends JavaPlugin
     {
         try
         {
-            return Utility.decodeAPIKey(getPluginJarFile(), "apikey");
+            return Utility.decodeAPIKey(getPluginJarFile(), "imas");
         }
         catch (IOException e)
         {
@@ -94,6 +107,7 @@ public class EEWAlert  extends JavaPlugin
 
                                 twitterManager.storeAccessToken(accessToken);
                                 twitterManager.startSetup();
+                                Messenger.messageToSender(sender, INFO, "Twitterと正しく認証されました。");
                             }
                             catch (TwitterException e)
                             {
@@ -165,5 +179,57 @@ public class EEWAlert  extends JavaPlugin
     public File getPluginJarFile()
     {
         return this.getFile();
+    }
+
+    public void noticeEewMessage(EEW eew)
+    {
+        List<String> eewMes = new ArrayList<String>();
+
+        if(eew.alarmType == GENERAL)
+        {
+            if((Integer.parseInt(eew.eewArray[3]) == 0) || (Integer.parseInt(eew.eewArray[3]) == 8) || (Integer.parseInt(eew.eewArray[3]) == 9))
+            {
+                eewMes.add(ChatColor.RED +    "----------緊急地震速報----------");
+
+                eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
+                eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
+                eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
+                eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth()+ "km");
+                eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+                eewMes.add(ChatColor.RED +    "震源地付近にお住まいの方は大きな地震に注意してください。");
+                eewMes.add(ChatColor.RED +    "この情報を鵜呑みにせず、テレビ・ラジオ等で正確な情報を収集してください。");
+                eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
+                eewMes.add(ChatColor.RED +    "--------------------------------");
+
+                EEWAlert.log.severe("緊急地震速報を受信しました。");
+            }
+        }
+        else if(eew.alarmType == ADVANCED && eewAlertConfig.demoMode)
+        {
+                eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
+                eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
+                eewMes.add(ChatColor.RED +    "念の為、テレビ・ラジオ等で正確な情報を収集してください。");
+                eewMes.add(ChatColor.RED +    "動作確認出来し次第、動作確認モードを無効にして下さい。");
+
+                eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
+                eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
+                eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
+                eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
+                eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+                eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
+                eewMes.add(ChatColor.RED +    "--------------------------------");
+
+            EEWAlert.log.info("緊急地震速報を受信しました。(動作確認モード)");
+        }
+        broadcastMessage(eewMes);
+    }
+
+    public static void broadcastMessage(List eewMes)
+    {
+
+        for(int i = 0; i < eewMes.size(); ++i)
+        {
+            Bukkit.broadcastMessage(eewMes.get(i).toString());
+        }
     }
 }
