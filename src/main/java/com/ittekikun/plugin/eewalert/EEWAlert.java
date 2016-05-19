@@ -165,16 +165,29 @@ public class EEWAlert  extends JavaPlugin
                 {
                     if(twitterManager.canTweet)
                     {
-                        try
+                        if(args.length >= 2)
                         {
-                            twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
-                            return true;
+                            try
+                            {
+                                twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
+                                Messenger.messageToSender(sender, INFO, "ツイートに成功しました。");
+                                return true;
+                            }
+                            catch (TwitterException e)
+                            {
+                                e.printStackTrace();
+                                Messenger.messageToSender(sender, SEVERE, "何らかの理由でツイートに失敗しました。");
+                                return true;
+                            }
                         }
-                        catch (TwitterException e)
+                        else
                         {
-                            e.printStackTrace();
-                            return true;
+                            Messenger.messageToSender(sender, WARNING, "ツイートする文章が含まれていません。");
                         }
+                    }
+                    else
+                    {
+                        Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(未認証)");
                     }
                 }
                 else
