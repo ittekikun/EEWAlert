@@ -14,7 +14,7 @@ public class Messenger
         {
             if (sender instanceof Player)
             {
-                sender.sendMessage(EEWAlert.prefix + ChatColor.WHITE + "[情報]" + ChatColor.WHITE + message);
+                sender.sendMessage(EEWAlert.prefix + ChatColor.AQUA + "[情報] " + ChatColor.WHITE + message);
             } else
             {
                 EEWAlert.log.info(message);
@@ -24,7 +24,7 @@ public class Messenger
         {
             if (sender instanceof Player)
             {
-                sender.sendMessage(EEWAlert.prefix + ChatColor.YELLOW + "[警告]" + ChatColor.WHITE + message);
+                sender.sendMessage(EEWAlert.prefix + ChatColor.YELLOW + "[警告] " + ChatColor.WHITE + message);
             } else
             {
                 EEWAlert.log.warning(message);
@@ -34,7 +34,7 @@ public class Messenger
         {
             if (sender instanceof Player)
             {
-                sender.sendMessage(EEWAlert.prefix + ChatColor.RED + "[重大]" + ChatColor.WHITE + message);
+                sender.sendMessage(EEWAlert.prefix + ChatColor.RED + "[重大] " + ChatColor.WHITE + message);
             }
             else
             {

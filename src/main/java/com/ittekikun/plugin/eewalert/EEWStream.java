@@ -183,6 +183,6 @@ public class EEWStream implements UserStreamListener
     @Override
     public void onException(Exception e)
     {
-
+        e.printStackTrace();
     }
 }

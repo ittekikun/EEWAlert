@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,8 +38,8 @@ public class EEWAlert  extends JavaPlugin
     public void onEnable()
     {
         String ver = getServer().getBukkitVersion();
-        //念のために1.9.5まで拾えるように
-        isV19 = (ver.startsWith("1.9-R") || ver.startsWith("1.9.1-R") || ver.startsWith("1.9.2-R") || ver.startsWith("1.9.3-R") || ver.startsWith("1.9.4-R") || ver.startsWith("1.9.5-R"));
+        //念のために1.9.7まで拾えるように
+        isV19 = (ver.startsWith("1.9-R") || ver.startsWith("1.9.1-R") || ver.startsWith("1.9.2-R") || ver.startsWith("1.9.3-R") || ver.startsWith("1.9.4-R") || ver.startsWith("1.9.5-R") || ver.startsWith("1.9.6-R") || ver.startsWith("1.9.7-R"));
 
         instance = this;
         pluginManager = instance.getServer().getPluginManager();
@@ -96,84 +97,122 @@ public class EEWAlert  extends JavaPlugin
             {
                 Messenger.messageToSender(sender, WARNING, "引数がありません。");
                 help(sender);
-                return false;
+                return true;
             }
 
             if (args[0].equalsIgnoreCase("pin"))
             {
-                if(twitterManager.canAuth)
+                if(checkPermission(sender, "eewalert.pin"))
                 {
-                    if(Utility.checkIntParse(args[1]))
+                    if(twitterManager.canAuth)
                     {
-                        if(args[1].length() == 7)
+                        if(args.length == 2)
                         {
-                            AccessToken accessToken;
-                            try
+                            if(Utility.checkIntParse(args[1]))
                             {
-                                accessToken = twitterManager.getAccessToken(args[1]);
+                                if(args[1].length() == 7)
+                                {
+                                    AccessToken accessToken;
+                                    try
+                                    {
+                                        accessToken = twitterManager.getAccessToken(args[1]);
 
-                                twitterManager.storeAccessToken(accessToken);
-                                Messenger.messageToSender(sender, INFO, "Twitterと正しく認証されました。");
-                                twitterManager.startSetup();
+                                        twitterManager.storeAccessToken(accessToken);
+                                        Messenger.messageToSender(sender, INFO, "Twitterと正しく認証されました。");
+                                        twitterManager.startSetup();
+                                    }
+                                    catch (TwitterException e)
+                                    {
+                                        e.printStackTrace();
+                                        Messenger.messageToSender(sender, SEVERE, "正しく認証されませんでした。(PINコードが使えなかった。もしくは無効になっている。)");
+                                        Messenger.messageToSender(sender, SEVERE, "お手数ですがもう一度お試し下さい。");
+                                    }
+                                    return true;
+                                }
+                                else
+                                {
+                                    Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(正しいPINコードの桁数は7です。)");
+                                    return true;
+                                }
                             }
-                            catch (TwitterException e)
+                            else
                             {
-                                e.printStackTrace();
-                                Messenger.messageToSender(sender, SEVERE, "正しく認証されませんでした。");
-                                Messenger.messageToSender(sender, SEVERE, "お手数ですがもう一度お試し下さい。");
+                                Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(整数値に変換できません。)");
+                                return true;
                             }
-                            return true;
                         }
                         else
                         {
-                            Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(数値が8字以上入力されています。)");
-                            return false;
+                            Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(コマンド構文が間違ってます。)");
+                            return true;
                         }
                     }
                     else
                     {
-                        Messenger.messageToSender(sender, WARNING, "PINコードが正しく入力されていません。(整数値に変換できません。)");
-                        return false;
+                        Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(認証時のみ使用)");
+                        return true;
                     }
                 }
                 else
                 {
-                    Messenger.messageToSender(sender, WARNING, "このコマンドは現在実行できません。(認証時のみ使用)");
-                    return false;
+                    Messenger.messageToSender(sender, WARNING, "そのコマンドを実行する権限がありません。");
+                    return true;
                 }
             }
             else if(args[0].equalsIgnoreCase("tweet"))
             {
-                if(twitterManager.canTweet)
+                if(checkPermission(sender, "eewalert.tweet"))
                 {
-                    try
+                    if(twitterManager.canTweet)
                     {
-                        twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
-                        return true;
+                        try
+                        {
+                            twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
+                            return true;
+                        }
+                        catch (TwitterException e)
+                        {
+                            e.printStackTrace();
+                            return true;
+                        }
                     }
-                    catch (TwitterException e)
+                }
+                else
+                {
+                    Messenger.messageToSender(sender, WARNING, "そのコマンドを実行する権限がありません。");
+                    return true;
+                }
+            }
+            else if(args[0].equalsIgnoreCase("reload"))
+            {
+                if(checkPermission(sender, "eewalert.reload"))
+                {
+                    HandlerList.unregisterAll(this);
+
+                    eewAlertConfig.loadConfig();
+
+                    if(eewAlertConfig.versionCheck)
                     {
-                        e.printStackTrace();
-                        return false;
+                        pluginManager.registerEvents(new VersionCheckListener(this), this);
                     }
+                    Messenger.messageToSender(sender, INFO, "Configファイルをリロードしました。");
+                    return true;
+                }
+                else
+                {
+                    Messenger.messageToSender(sender, WARNING, "そのコマンドを実行する権限がありません。");
+                    return true;
                 }
             }
             else if(args[0].equalsIgnoreCase("help"))
             {
                 help(sender);
+                return true;
             }
-            else if(args[0].equalsIgnoreCase("reload"))
+            else
             {
-                twitterManager.shutdownRecieveStream();
-                HandlerList.unregisterAll(this);
-
-                eewAlertConfig.loadConfig();
-
-                if(eewAlertConfig.versionCheck)
-                {
-                    pluginManager.registerEvents(new VersionCheckListener(this), this);
-                }
-                twitterManager.startRecieveStream();
+                help(sender);
+                return true;
             }
         }
         return false;
@@ -181,12 +220,33 @@ public class EEWAlert  extends JavaPlugin
 
     public void help(CommandSender sender)
     {
-        Messenger.messageToSender(sender, INFO, "[[[[[ヘルプコマンド]]]]");
+        Messenger.messageToSender(sender, INFO, "---------------ヘルプコマンド---------------");
         Messenger.messageToSender(sender, INFO, "現在使えるコマンドは以下の通りです。");
         Messenger.messageToSender(sender, INFO, "/eew pin <pin>    ※認証時のみ使用します。");
         Messenger.messageToSender(sender, INFO, "/eew reload       ※設定ファイルを再読み込みします。");
         Messenger.messageToSender(sender, INFO, "/eew tweet <text> ※textの内容をツイートします。");
         Messenger.messageToSender(sender, INFO, "/eew help         ※helpを表示します。");
+    }
+
+    public boolean checkPermission(CommandSender sender, String permission)
+    {
+        if(sender instanceof Player)
+        {
+            Player player = (Player)sender;
+            if(player.hasPermission(permission) || player.isOp())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        //コンソールは管理者扱い
+        else
+        {
+            return true;
+        }
     }
 
     @Override
@@ -225,7 +285,7 @@ public class EEWAlert  extends JavaPlugin
                 eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
                 eewMes.add(ChatColor.RED +    "--------------------------------");
 
-                EEWAlert.log.severe("緊急地震速報を受信しました。");
+                EEWAlert.log.info("緊急地震速報を受信しました。");
             }
         }
         else if(eew.alarmType == ADVANCED && eewAlertConfig.demoMode)

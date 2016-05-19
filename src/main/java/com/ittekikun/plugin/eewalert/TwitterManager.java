@@ -21,6 +21,8 @@ public class TwitterManager
     public boolean canTweet = false;
     public boolean canAuth = false;
 
+    public boolean streamStatus = false;
+
     public TwitterManager(EEWAlert eewAlert)
     {
         this.eewAlert = eewAlert;
@@ -205,6 +207,8 @@ public class TwitterManager
         eewStream.addListener(new EEWStream(eewAlert));
         eewStream.user();
 
+        streamStatus = true;
+
         EEWAlert.log.info("ユーザーストリームに接続します。");
 
         //214358709 = @eewbot
@@ -215,7 +219,12 @@ public class TwitterManager
 
     public void shutdownRecieveStream()
     {
-        eewStream.shutdown();
-        EEWAlert.log.info("ユーザーストリームから切断しました。");
+        if(streamStatus)
+        {
+            eewStream.shutdown();
+            EEWAlert.log.info("ユーザーストリームから切断しました。");
+
+            streamStatus = false;
+        }
     }
 }
