@@ -111,7 +111,7 @@ public class EEWAlert  extends JavaPlugin
                             if(Utility.checkIntParse(args[1]))
                             {
                                 if(args[1].length() == 7)
-                                {
+                                 {
                                     AccessToken accessToken;
                                     try
                                     {
@@ -169,7 +169,7 @@ public class EEWAlert  extends JavaPlugin
                         {
                             try
                             {
-                                twitterManager.twitter.updateStatus(Utility.JoinArray(args,1));
+                                twitterManager.twitter.updateStatus(Utility.JoinArray(args, 1));
                                 Messenger.messageToSender(sender, INFO, "ツイートに成功しました。");
                                 return true;
                             }
@@ -220,6 +220,11 @@ public class EEWAlert  extends JavaPlugin
             else if(args[0].equalsIgnoreCase("help"))
             {
                 help(sender);
+                return true;
+            }
+            else if((args[0].equalsIgnoreCase("test")))
+            {
+
                 return true;
             }
             else
