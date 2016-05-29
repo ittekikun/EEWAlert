@@ -1,5 +1,6 @@
 package com.ittekikun.plugin.eewalert;
 
+import org.bukkit.Bukkit;
 import twitter4j.*;
 
 public class EEWStream implements UserStreamListener
@@ -14,14 +15,14 @@ public class EEWStream implements UserStreamListener
     @Override
     public void onStatus(Status status)
     {
-        if(!(status.isRetweet()))
-        {
-            String array[] = status.getText().split(",", 0);
+        String array[] = status.getText().split(",", 0);
 
-            EEW eew = new EEW(array);
+        EEW eew = new EEW(array, status.isRetweet());
 
-            eewAlert.noticeEewMessage(eew);
-        }
+        eewAlert.noticeEewMessage(eew);
+
+        EEWReceiveEvent eewReceiveEvent = new EEWReceiveEvent(eew);
+        Bukkit.getServer().getPluginManager().callEvent(eewReceiveEvent);
     }
 
     @Override

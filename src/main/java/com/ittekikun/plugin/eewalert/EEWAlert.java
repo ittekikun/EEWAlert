@@ -289,7 +289,7 @@ public class EEWAlert  extends JavaPlugin
 
         if(eew.alarmType == GENERAL)
         {
-            if((Integer.parseInt(eew.eewArray[3]) == 0) || (Integer.parseInt(eew.eewArray[3]) == 8) || (Integer.parseInt(eew.eewArray[3]) == 9))
+            if(((Integer.parseInt(eew.eewArray[3]) == 0) || (Integer.parseInt(eew.eewArray[3]) == 8) || (Integer.parseInt(eew.eewArray[3]) == 9)) && !eew.isRetweet())
             {
                 eewMes.add(ChatColor.RED +    "----------緊急地震速報----------");
 
@@ -301,6 +301,7 @@ public class EEWAlert  extends JavaPlugin
                 eewMes.add(ChatColor.RED +    "震源地付近にお住まいの方は大きな地震に注意してください。");
                 eewMes.add(ChatColor.RED +    "この情報を鵜呑みにせず、テレビ・ラジオ等で正確な情報を収集してください。");
                 eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
+
                 eewMes.add(ChatColor.RED +    "--------------------------------");
 
                 EEWAlert.log.info("緊急地震速報を受信しました。");
@@ -308,20 +309,27 @@ public class EEWAlert  extends JavaPlugin
         }
         else if(eew.alarmType == ADVANCED && eewAlertConfig.demoMode)
         {
-                eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
-                eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
-                eewMes.add(ChatColor.RED +    "念の為、テレビ・ラジオ等で正確な情報を収集してください。");
-                eewMes.add(ChatColor.RED +    "動作確認出来し次第、動作確認モードを無効にして下さい。");
+            eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
-                eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
-                eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
-                eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
-                eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
-                eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
-                eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
-                eewMes.add(ChatColor.RED +    "--------------------------------");
+            eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
+            eewMes.add(ChatColor.RED +    "過去に発表された緊急地震速報を表示している可能性があります。");
+            eewMes.add(ChatColor.RED +    "念の為、テレビ・ラジオ等で正確な情報を収集してください。");
+            eewMes.add(ChatColor.RED +    "動作確認出来し次第、動作確認モードを無効にして下さい。");
+
+            eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
+            eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
+            eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
+            eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
+            eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+            eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
+
+            eewMes.add(ChatColor.RED +    "--------------------------------");
 
             EEWAlert.log.info("緊急地震速報を受信しました。(動作確認モード)");
+        }
+        else
+        {
+            return;
         }
         broadcastMessage(eewMes);
     }

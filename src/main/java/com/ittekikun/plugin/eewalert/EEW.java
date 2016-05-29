@@ -11,6 +11,8 @@ public class EEW
 {
     public String[] eewArray;
 
+    public boolean isRetweet;
+
     public String maxScale;
     public String epicenter;
     public String occurrenceTime;
@@ -21,15 +23,17 @@ public class EEW
     public FocusType focusType;
     public AlarmType alarmType;
 
-    public EEW(String[] array)
+    public EEW(String[] array, boolean isRetweet)
     {
         this.eewArray = array;
 
-        occurrenceTime = array[2];
-        epicenter = array[9];
-        depth = array[10];
-        magnitude = array[11];
-        maxScale = array[12];
+        this.isRetweet = isRetweet;
+
+        this.occurrenceTime = array[2];
+        this.epicenter = array[9];
+        this.depth = array[10];
+        this.magnitude = array[11];
+        this.maxScale = array[12];
 
         if((Integer.parseInt(array[14])) == 1)
         {
@@ -57,6 +61,11 @@ public class EEW
         {
             focusType = SEA;
         }
+    }
+
+    public boolean isRetweet()
+    {
+        return isRetweet;
     }
 
     public String getOccurrenceTime()
