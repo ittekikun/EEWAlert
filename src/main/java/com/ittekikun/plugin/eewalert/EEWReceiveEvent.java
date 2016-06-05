@@ -14,9 +14,37 @@ public class EEWReceiveEvent extends Event
         this.eew = eew;
     }
 
-    public String[] getEEW()
+    /**
+     * getRawArray
+     *
+     * eewbotのツイートを「,」で区切って配列に代入した物を返します。
+     * 使うならこちらを使うべきでしょう。
+     *
+     * フォーマットについては下記を御覧ください。
+     * http://d.hatena.ne.jp/Magi/20110403
+     *
+     * 非推奨理由はメソッド名をまだ決定しかねてるからです。
+     */
+    @Deprecated
+    public String[] getRawArray()
     {
         return eew.getEewArray();
+    }
+
+    /**
+     * getEew
+     *
+     * eewbotのツイートを元に作ったEEWクラスを返します。
+     * まだ未実装の部分や一部型を変更する可能性があるので使用はおすすめしかねます。
+     *
+     * どなたか良いアドバイス下さい・・・
+     *
+     * 非推奨理由は上記のとおりです。
+     */
+    @Deprecated
+    public EEW getEew()
+    {
+        return eew;
     }
 
     @Override

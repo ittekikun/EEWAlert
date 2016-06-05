@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static com.ittekikun.plugin.eewalert.EEW.AlarmType.ADVANCED;
 import static com.ittekikun.plugin.eewalert.EEW.AlarmType.GENERAL;
 import static com.ittekikun.plugin.eewalert.Messenger.MessageType.*;
 
@@ -306,8 +306,30 @@ public class EEWAlert  extends JavaPlugin
 
                 EEWAlert.log.info("緊急地震速報を受信しました。");
             }
+            else if(eew.isRetweet() && eewAlertConfig.demoMode)
+            {
+                eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
+
+                eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
+                eewMes.add(ChatColor.RED +    "過去に発表された緊急地震速報を表示している可能性があります。");
+                eewMes.add(ChatColor.RED +    "念の為、テレビ・ラジオ等で正確な情報を収集してください。");
+                eewMes.add(ChatColor.RED +    "動作確認出来し次第、動作確認モードを無効にして下さい。");
+
+                eewMes.add(ChatColor.RED + "※これはリツイートされたツイートを表示しています");
+
+                eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
+                eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
+                eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
+                eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
+                eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+                eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
+
+                eewMes.add(ChatColor.RED +    "--------------------------------");
+
+                EEWAlert.log.info("緊急地震速報を受信しました。(動作確認モード)");
+            }
         }
-        else if(eew.alarmType == ADVANCED && eewAlertConfig.demoMode)
+        else if(eewAlertConfig.demoMode)
         {
             eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
@@ -315,6 +337,11 @@ public class EEWAlert  extends JavaPlugin
             eewMes.add(ChatColor.RED +    "過去に発表された緊急地震速報を表示している可能性があります。");
             eewMes.add(ChatColor.RED +    "念の為、テレビ・ラジオ等で正確な情報を収集してください。");
             eewMes.add(ChatColor.RED +    "動作確認出来し次第、動作確認モードを無効にして下さい。");
+
+            if(eew.isRetweet())
+            {
+                eewMes.add(ChatColor.RED + "※これはリツイートされたツイートを表示しています");
+            }
 
             eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
             eewMes.add(ChatColor.YELLOW + "震源地: " + ChatColor.WHITE + eew.getEpicenter());
@@ -334,12 +361,18 @@ public class EEWAlert  extends JavaPlugin
         broadcastMessage(eewMes);
     }
 
-    public static void broadcastMessage(List eewMes)
+    public void broadcastMessage(final List eewMes)
     {
-
-        for(int i = 0; i < eewMes.size(); ++i)
+        new BukkitRunnable()
         {
-            Bukkit.broadcastMessage(eewMes.get(i).toString());
-        }
+            @Override
+            public void run()
+            {
+                for(int i = 0; i < eewMes.size(); ++i)
+                {
+                    Bukkit.broadcastMessage(eewMes.get(i).toString());
+                }
+            }
+        }.runTaskAsynchronously(this);
     }
 }
