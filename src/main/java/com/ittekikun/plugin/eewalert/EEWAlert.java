@@ -305,8 +305,7 @@ public class EEWAlert  extends JavaPlugin
 
         if(eew.alarmType == GENERAL)
         {
-            // TODO
-            if(!notified && eew.isRetweet())
+            if(!notified && !eew.isRetweet())
             {
                 if(eewAlertConfig.sendTitle)
                 {
