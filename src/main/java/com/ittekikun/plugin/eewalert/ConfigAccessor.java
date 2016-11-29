@@ -2,7 +2,6 @@ package com.ittekikun.plugin.eewalert;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,22 +9,22 @@ import java.io.IOException;
 public class ConfigAccessor
 {
     private final String fileName;
-    private final JavaPlugin plugin;
+    private final EEWAlert plugin;
 
     private File configFile;
     private FileConfiguration fileConfiguration;
 
-    public ConfigAccessor(JavaPlugin plugin, String fileName)
+    public ConfigAccessor(EEWAlert plugin, String fileName)
     {
         if(plugin == null)
         {
             throw new IllegalArgumentException("plugin cannot be null");
         }
-        //代替メソッドわからない
-        if(!plugin.isInitialized())
-        {
-            throw new IllegalArgumentException("plugin must be initialized");
-        }
+//        //代替メソッドわからない
+//        if(!plugin.isInitialized())
+//        {
+//            throw new IllegalArgumentException("plugin must be initialized");
+//        }
         this.plugin = plugin;
         this.fileName = fileName;
         File dataFolder = plugin.getDataFolder();
@@ -75,13 +74,13 @@ public class ConfigAccessor
         if(!configFile.exists())
         {
             //1.9のBUKKITAPIの仕様変更によりコピー処理を分ける必要がある。
-            if(EEWAlert.isV19)
+            if(Utility.isCB19orLater())
             {
-                Utility.copyRawFileFromJar(EEWAlert.instance.getPluginJarFile(), configFile, fileName);
+                Utility.copyRawFileFromJar(plugin.instance.getPluginJarFile(), configFile, fileName);
             }
             else
             {
-                Utility.copyFileFromJar(EEWAlert.instance.getPluginJarFile(), configFile, fileName);
+                Utility.copyFileFromJar(plugin.instance.getPluginJarFile(), configFile, fileName);
             }
         }
     }

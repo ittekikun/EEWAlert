@@ -19,7 +19,10 @@ public class EEWStream implements UserStreamListener
 
         EEW eew = new EEW(array, status.isRetweet());
 
-        eewAlert.noticeEewMessage(eew);
+        if(eewAlert.eewAlertConfig.notificationMode)
+        {
+            eewAlert.noticeEewMessage(eew);
+        }
 
         EEWReceiveEvent eewReceiveEvent = new EEWReceiveEvent(eew);
         Bukkit.getServer().getPluginManager().callEvent(eewReceiveEvent);

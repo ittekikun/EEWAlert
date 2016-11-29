@@ -6,6 +6,8 @@ public class EEWAlertConfig
     public ConfigAccessor system;
 
     public boolean versionCheck;
+    public boolean sendTitle;
+    public boolean notificationMode;
     public boolean demoMode;
 
     public EEWAlertConfig(EEWAlert eewAlert)
@@ -19,6 +21,8 @@ public class EEWAlertConfig
         system.saveDefaultConfig();
 
         versionCheck = system.getConfig().getBoolean("VersionCheck", true);
+        sendTitle = system.getConfig().getBoolean("SendTitle", false);
+        notificationMode = system.getConfig().getBoolean("NotificationMode", true);
         demoMode = system.getConfig().getBoolean("DemoMode", false);
     }
 }

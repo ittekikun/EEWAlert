@@ -15,7 +15,7 @@ public class EEWReceiveEvent extends Event
     }
 
     /**
-     * getRawArray
+     * getEewArray
      *
      * eewbotのツイートを「,」で区切って配列に代入した物を返します。
      * 使うならこちらを使うべきでしょう。
@@ -26,7 +26,7 @@ public class EEWReceiveEvent extends Event
      * 非推奨理由はメソッド名をまだ決定しかねてるからです。
      */
     @Deprecated
-    public String[] getRawArray()
+    public String[] getEewArray()
     {
         return eew.getEewArray();
     }

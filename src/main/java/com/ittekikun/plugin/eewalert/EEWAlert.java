@@ -23,24 +23,22 @@ import static com.ittekikun.plugin.eewalert.Messenger.MessageType.*;
 
 public class EEWAlert  extends JavaPlugin
 {
-    public static EEWAlert instance;
-    public static APIKey apiKey;
+    public  EEWAlert instance;
+    public APIKey apiKey;
     public static Logger log;
     public static final String prefix = "[EEWAlert] ";
-    public static PluginManager pluginManager;
+    public  PluginManager pluginManager;
     public static boolean forceDisableMode;
     public TwitterManager twitterManager;
     public EEWAlertConfig eewAlertConfig;
 
-    public static boolean isV19;
+    public static ArrayList<String> notifiedEEWIDList = new ArrayList<>();
+
+    public TitleSender titleSender;
 
     @Override
     public void onEnable()
     {
-        String ver = getServer().getBukkitVersion();
-        //念のために1.9.7まで拾えるように
-        isV19 = (ver.startsWith("1.9-R") || ver.startsWith("1.9.1-R") || ver.startsWith("1.9.2-R") || ver.startsWith("1.9.3-R") || ver.startsWith("1.9.4-R") || ver.startsWith("1.9.5-R") || ver.startsWith("1.9.6-R") || ver.startsWith("1.9.7-R"));
-
         instance = this;
         pluginManager = instance.getServer().getPluginManager();
 
@@ -69,6 +67,8 @@ public class EEWAlert  extends JavaPlugin
 
         twitterManager = new TwitterManager(this);
         twitterManager.startSetup();
+
+        titleSender = new TitleSender();
     }
 
     public APIKey loadAPIkey()
@@ -224,7 +224,11 @@ public class EEWAlert  extends JavaPlugin
             }
             else if((args[0].equalsIgnoreCase("test")))
             {
-
+                for(Player player : Utility.getOnlinePlayers())
+                {
+                    titleSender.setTime_second(player,0, 20, 0);
+                    titleSender.sendTitle(player, "§c緊急地震速報が発表されました", "§e震源域付近にお住まいの方は強い揺れに注意して下さい");
+                }
                 return true;
             }
             else
@@ -287,10 +291,23 @@ public class EEWAlert  extends JavaPlugin
     {
         List<String> eewMes = new ArrayList<String>();
 
+        //通知済か判定
+        boolean notified = (!(notifiedEEWIDList.lastIndexOf(eew.getEewArray()[5]) == -1));
+
         if(eew.alarmType == GENERAL)
         {
-            if(((Integer.parseInt(eew.eewArray[3]) == 0) || (Integer.parseInt(eew.eewArray[3]) == 8) || (Integer.parseInt(eew.eewArray[3]) == 9)) && !eew.isRetweet())
+            // TODO
+            if(!notified && eew.isRetweet())
             {
+                if(eewAlertConfig.sendTitle)
+                {
+                    for(Player player : Utility.getOnlinePlayers())
+                    {
+                        titleSender.setTime_second(player,0, 20, 0);
+                        titleSender.sendTitle(player, "§c緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                    }
+                }
+
                 eewMes.add(ChatColor.RED +    "----------緊急地震速報----------");
 
                 eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
@@ -298,16 +315,42 @@ public class EEWAlert  extends JavaPlugin
                 eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
                 eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth()+ "km");
                 eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+                if(eew.focusType == EEW.FocusType.LAND)
+                {
+                    eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.WHITE + "陸");
+                }
+                else if(eew.focusType == EEW.FocusType.SEA)
+                {
+                    eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.RED + "海");
+                }
+
                 eewMes.add(ChatColor.RED +    "震源地付近にお住まいの方は大きな地震に注意してください。");
+                if(eew.focusType == EEW.FocusType.SEA)
+                {
+                    eewMes.add(ChatColor.YELLOW +    "※※※震源が海の為、津波が発生する可能性があります。※※※");
+
+                }
                 eewMes.add(ChatColor.RED +    "この情報を鵜呑みにせず、テレビ・ラジオ等で正確な情報を収集してください。");
                 eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
 
                 eewMes.add(ChatColor.RED +    "--------------------------------");
 
                 EEWAlert.log.info("緊急地震速報を受信しました。");
+
+                //通知済リストへ追加
+                notifiedEEWIDList.add(eew.getEewArray()[5]);
             }
             else if(eew.isRetweet() && eewAlertConfig.demoMode)
             {
+                if(eewAlertConfig.sendTitle)
+                {
+                    for(Player player : Utility.getOnlinePlayers())
+                    {
+                        titleSender.setTime_second(player,0, 20, 0);
+                        titleSender.sendTitle(player, "§c(動作確認モード有効中)緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                    }
+                }
+
                 eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
                 eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
@@ -322,6 +365,21 @@ public class EEWAlert  extends JavaPlugin
                 eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
                 eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
                 eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+                if(eew.focusType == EEW.FocusType.LAND)
+                {
+                    eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.WHITE + "陸");
+                }
+                else if(eew.focusType == EEW.FocusType.SEA)
+                {
+                    eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.RED + "海");
+                }
+
+                if(eew.focusType == EEW.FocusType.SEA)
+                {
+                    eewMes.add(ChatColor.YELLOW +    "※※※震源が海の為、津波が発生する可能性があります。※※※");
+
+                }
+
                 eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
 
                 eewMes.add(ChatColor.RED +    "--------------------------------");
@@ -331,6 +389,15 @@ public class EEWAlert  extends JavaPlugin
         }
         else if(eewAlertConfig.demoMode)
         {
+            if(eewAlertConfig.sendTitle)
+            {
+                for(Player player : Utility.getOnlinePlayers())
+                {
+                    titleSender.setTime_second(player,0, 20, 0);
+                    titleSender.sendTitle(player, "§c(動作確認モード有効中)緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                }
+            }
+
             eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
             eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
@@ -348,6 +415,21 @@ public class EEWAlert  extends JavaPlugin
             eewMes.add(ChatColor.YELLOW + "マグニチュード: " + ChatColor.WHITE + eew.getMagnitude());
             eewMes.add(ChatColor.YELLOW + "深さ: " + ChatColor.WHITE + eew.getDepth() + "km");
             eewMes.add(ChatColor.YELLOW + "最大震度: " + ChatColor.WHITE + eew.getMaxScale());
+            if(eew.focusType == EEW.FocusType.LAND)
+            {
+                eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.WHITE + "陸");
+            }
+            else if(eew.focusType == EEW.FocusType.SEA)
+            {
+                eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.RED + "海");
+            }
+
+            if(eew.focusType == EEW.FocusType.SEA)
+            {
+                eewMes.add(ChatColor.YELLOW +    "※※※震源が海の為、津波が発生する可能性があります。※※※");
+
+            }
+
             eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
 
             eewMes.add(ChatColor.RED +    "--------------------------------");
