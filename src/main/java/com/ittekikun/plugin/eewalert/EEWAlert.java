@@ -68,7 +68,10 @@ public class EEWAlert  extends JavaPlugin
         twitterManager = new TwitterManager(this);
         twitterManager.startSetup();
 
-        titleSender = new TitleSender();
+        if(eewAlertConfig.sendTitle)
+        {
+            titleSender = new TitleSender();
+        }
     }
 
     public APIKey loadAPIkey()
@@ -208,6 +211,12 @@ public class EEWAlert  extends JavaPlugin
                     {
                         pluginManager.registerEvents(new VersionCheckListener(this), this);
                     }
+
+                    if(eewAlertConfig.sendTitle)
+                    {
+                        titleSender = new TitleSender();
+                    }
+
                     Messenger.messageToSender(sender, INFO, "Configファイルをリロードしました。");
                     return true;
                 }
@@ -424,12 +433,6 @@ public class EEWAlert  extends JavaPlugin
                 eewMes.add(ChatColor.YELLOW + "震源海陸判定: " + ChatColor.RED + "海");
             }
 
-            if(eew.focusType == EEW.FocusType.SEA)
-            {
-                eewMes.add(ChatColor.YELLOW +    "※※※震源が海の為、津波が発生する可能性があります。※※※");
-
-            }
-
             eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
 
             eewMes.add(ChatColor.RED +    "--------------------------------");
@@ -440,6 +443,7 @@ public class EEWAlert  extends JavaPlugin
         {
             return;
         }
+
         broadcastMessage(eewMes);
     }
 
