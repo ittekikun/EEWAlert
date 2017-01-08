@@ -162,7 +162,7 @@ public class EEWAlert  extends JavaPlugin
                     return true;
                 }
             }
-            else if(args[0].equalsIgnoreCase("tweet"))
+            else if(args[0].equalsIgnoreCase("tw") || args[0].equalsIgnoreCase("tweet"))
             {
                 if(checkPermission(sender, "eewalert.tweet"))
                 {
