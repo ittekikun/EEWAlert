@@ -279,28 +279,29 @@ public class EEWAlert  extends JavaPlugin
             }
             else if((args[0].equalsIgnoreCase("test")))
             {
-                for(final Player player : Utility.getOnlinePlayers())
+
+                new BukkitRunnable()
                 {
-                    new BukkitRunnable()
+                    @Override
+                    public void run()
                     {
-                        @Override
-                        public void run()
+                        if(eewAlertConfig.soundSE)
                         {
-                            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1F);
-
-                            //1.9から
-                            Class<?> cl = Sound.class;
-
-                            for (Object o: cl.getEnumConstants())
+                            for(final Player player : Utility.getOnlinePlayers())
                             {
-                                if (o.toString().equals("ENTITY_PLAYER_LEVELUP") || (o.toString().equals("LEVEL_UP")))
+                                Class<?> cl = Sound.class;
+
+                                for (Object o: cl.getEnumConstants())
                                 {
-                                    player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                    if (o.toString().equals(eewAlertConfig.soundSEName))
+                                    {
+                                        player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                    }
                                 }
                             }
                         }
-                    }.runTaskAsynchronously(this);
-                }
+                    }
+                }.runTaskAsynchronously(this);
                 return true;
             }
             else
