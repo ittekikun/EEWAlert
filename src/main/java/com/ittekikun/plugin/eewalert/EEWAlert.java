@@ -2,6 +2,7 @@ package com.ittekikun.plugin.eewalert;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -71,6 +72,30 @@ public class EEWAlert  extends JavaPlugin
         if(eewAlertConfig.sendTitle)
         {
             titleSender = new TitleSender();
+            log.info("[BETA]緊急地震速報をTitleコマンドで通知する機能を有効にしました。(SendTitle)");
+        }
+
+        if(eewAlertConfig.soundSE)
+        {
+            boolean soundNameExists = false;
+
+            Class<?> cl = Sound.class;
+            for (Object o: cl.getEnumConstants())
+            {
+                if(o.toString().equals(eewAlertConfig.soundSEName))
+                {
+                    soundNameExists = true;
+                    log.info("[BETA]緊急地震速報を音で通知する機能を有効にしました。(SoundSE)");
+                    break;
+                }
+            }
+
+            if(!soundNameExists)
+            {
+                log.warning("設定されているSE「"+ eewAlertConfig.soundSEName + "」が存在しないのでSoundSE設定を無効化します。");
+                eewAlertConfig.soundSE = false;
+                return;
+            }
         }
     }
 
@@ -217,6 +242,27 @@ public class EEWAlert  extends JavaPlugin
                         titleSender = new TitleSender();
                     }
 
+                    if(eewAlertConfig.soundSE)
+                    {
+                        boolean soundNameExists = false;
+
+                        Class<?> cl = Sound.class;
+                        for (Object o: cl.getEnumConstants())
+                        {
+                            if(o.toString().equals(eewAlertConfig.soundSEName))
+                            {
+                                soundNameExists = true;
+                                break;
+                            }
+                        }
+
+                        if(!soundNameExists)
+                        {
+                            Messenger.messageToSender(sender, WARNING, "設定されているSE「"+ eewAlertConfig.soundSEName + "」が存在しないのでSoundSE設定を無効化します。");
+                            eewAlertConfig.soundSE = false;
+                        }
+                    }
+
                     Messenger.messageToSender(sender, INFO, "Configファイルをリロードしました。");
                     return true;
                 }
@@ -233,10 +279,27 @@ public class EEWAlert  extends JavaPlugin
             }
             else if((args[0].equalsIgnoreCase("test")))
             {
-                for(Player player : Utility.getOnlinePlayers())
+                for(final Player player : Utility.getOnlinePlayers())
                 {
-                    titleSender.setTime_second(player,0, 20, 0);
-                    titleSender.sendTitle(player, "§c緊急地震速報が発表されました", "§e震源域付近にお住まいの方は強い揺れに注意して下さい");
+                    new BukkitRunnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1F);
+
+                            //1.9から
+                            Class<?> cl = Sound.class;
+
+                            for (Object o: cl.getEnumConstants())
+                            {
+                                if (o.toString().equals("ENTITY_PLAYER_LEVELUP") || (o.toString().equals("LEVEL_UP")))
+                                {
+                                    player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                }
+                            }
+                        }
+                    }.runTaskAsynchronously(this);
                 }
                 return true;
             }
@@ -296,7 +359,7 @@ public class EEWAlert  extends JavaPlugin
         return this.getFile();
     }
 
-    public void noticeEewMessage(EEW eew)
+    public void noticeEewMessage(final EEW eew)
     {
         List<String> eewMes = new ArrayList<String>();
 
@@ -307,15 +370,6 @@ public class EEWAlert  extends JavaPlugin
         {
             if(!notified && !eew.isRetweet())
             {
-                if(eewAlertConfig.sendTitle)
-                {
-                    for(Player player : Utility.getOnlinePlayers())
-                    {
-                        titleSender.setTime_second(player,0, 20, 0);
-                        titleSender.sendTitle(player, "§c緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
-                    }
-                }
-
                 eewMes.add(ChatColor.RED +    "----------緊急地震速報----------");
 
                 eewMes.add(ChatColor.YELLOW + "発表時刻: " + ChatColor.WHITE + eew.getOccurrenceTime());
@@ -343,6 +397,41 @@ public class EEWAlert  extends JavaPlugin
 
                 eewMes.add(ChatColor.RED +    "--------------------------------");
 
+                //追加機能
+                new BukkitRunnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        final ArrayList<Player> players = Utility.getOnlinePlayers();
+
+                        if(eewAlertConfig.sendTitle)
+                        {
+                            for(Player player : players)
+                            {
+                                titleSender.setTime_second(player,0, 20, 0);
+                                titleSender.sendTitle(player, "§c緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                            }
+                        }
+
+                        if(eewAlertConfig.soundSE)
+                        {
+                            for(final Player player : players)
+                            {
+                                Class<?> cl = Sound.class;
+
+                                for (Object o: cl.getEnumConstants())
+                                {
+                                    if (o.toString().equals(eewAlertConfig.soundSEName))
+                                    {
+                                        player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.runTaskAsynchronously(this);
+
                 EEWAlert.log.info("緊急地震速報を受信しました。");
 
                 //通知済リストへ追加
@@ -350,15 +439,6 @@ public class EEWAlert  extends JavaPlugin
             }
             else if(eew.isRetweet() && eewAlertConfig.demoMode)
             {
-                if(eewAlertConfig.sendTitle)
-                {
-                    for(Player player : Utility.getOnlinePlayers())
-                    {
-                        titleSender.setTime_second(player,0, 20, 0);
-                        titleSender.sendTitle(player, "§c(動作確認モード有効中)緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
-                    }
-                }
-
                 eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
                 eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
@@ -392,20 +472,46 @@ public class EEWAlert  extends JavaPlugin
 
                 eewMes.add(ChatColor.RED +    "--------------------------------");
 
+                //追加機能
+                new BukkitRunnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        final ArrayList<Player> players = Utility.getOnlinePlayers();
+
+                        if(eewAlertConfig.sendTitle)
+                        {
+                            for(Player player : players)
+                            {
+                                titleSender.setTime_second(player,0, 20, 0);
+                                titleSender.sendTitle(player, "(動作確認モード有効中)§c緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                            }
+                        }
+
+                        if(eewAlertConfig.soundSE)
+                        {
+                            for(final Player player : players)
+                            {
+                                Class<?> cl = Sound.class;
+
+                                for (Object o: cl.getEnumConstants())
+                                {
+                                    if (o.toString().equals(eewAlertConfig.soundSEName))
+                                    {
+                                        player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.runTaskAsynchronously(this);
+
                 EEWAlert.log.info("緊急地震速報を受信しました。(動作確認モード)");
             }
         }
         else if(eewAlertConfig.demoMode)
         {
-            if(eewAlertConfig.sendTitle)
-            {
-                for(Player player : Utility.getOnlinePlayers())
-                {
-                    titleSender.setTime_second(player,0, 20, 0);
-                    titleSender.sendTitle(player, "§c(動作確認モード有効中)緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
-                }
-            }
-
             eewMes.add(ChatColor.RED +    "----------緊急地震速報(動作確認モード有効中)----------");
 
             eewMes.add(ChatColor.RED +    "テレビなどで普段発表されていない緊急地震速報を表示しています。");
@@ -435,6 +541,41 @@ public class EEWAlert  extends JavaPlugin
             eewMes.add(ChatColor.RED +    "※この情報は震度速報ではありません。あくまでも、地震の規模を早期に推定するものです。");
 
             eewMes.add(ChatColor.RED +    "--------------------------------");
+
+            //追加機能
+            new BukkitRunnable()
+            {
+                @Override
+                public void run()
+                {
+                    final ArrayList<Player> players = Utility.getOnlinePlayers();
+
+                    if(eewAlertConfig.sendTitle)
+                    {
+                        for(Player player : players)
+                        {
+                            titleSender.setTime_second(player,0, 20, 0);
+                            titleSender.sendTitle(player, "(動作確認モード有効中)§c緊急地震速報が発表されました", "§e" + eew.getEpicenter() + "付近にお住まいの方は強い揺れに注意して下さい");
+                        }
+                    }
+
+                    if(eewAlertConfig.soundSE)
+                    {
+                        for(final Player player : players)
+                        {
+                            Class<?> cl = Sound.class;
+
+                            for (Object o: cl.getEnumConstants())
+                            {
+                                if (o.toString().equals(eewAlertConfig.soundSEName))
+                                {
+                                    player.playSound(player.getLocation(), (Sound)o, 10, 1);
+                                }
+                            }
+                        }
+                    }
+                }
+            }.runTaskAsynchronously(this);
 
             EEWAlert.log.info("緊急地震速報を受信しました。(動作確認モード)");
         }

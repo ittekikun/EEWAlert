@@ -1,7 +1,7 @@
 # EEWAlert
 # @author     ittekikun
 # @license    LGPLv3(同梱ライブラリはこれに限らず)
-# @copyright  Copyright ittekikun 2016
+# @copyright  Copyright ittekikun 2016-2017
 #
 # ※※重要※※
 #
@@ -18,12 +18,16 @@
 #
 # VersionCheck: (eewalert.vcheck)権限もしくはOP権限を持っているプレイヤーにバージョンアップ情報を通知します。(アップデート内容も表示しますので常に有効にする事をおすすめします。)
 # SendTitle: [BETA] 緊急地震速報受信時にTitleコマンドを使用して通知を強化します。他のTitleコマンドを使用するプラグインと競合する可能性があるのでご注意下さい。※1.8以前では動作しません。有効にしないで下さい。
+# SoundSE: [BETA] 緊急地震速報受信時にSoundSENameの音を全プレイヤーに鳴らします。現在音のピッチと音量は調節不可能です。
+# SoundSEName: 上記設定が有効時のみ使用します。初期設定はウィザーがスポーンする音です。音の一覧はこちら→https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
 # DemoMode: 動作確認をします。(このモードを有効にすると、テレビなどで普段発表されていない緊急地震速報「も」受信します。接続されている他のユーザーに誤解を与えないようご注意下さい。)
 #
-# NotificationMode: 当プラグインが提供しているAPIを使用している時、このプラグインの通知を必要としない場合はfalseにすれば通知されません。（SendTitleの設定も無視されます。） ※基本的には弄るべきではありません。
+# NotificationMode: 当プラグインが提供しているAPIを使用している時、このプラグインの通知を必要としない場合はfalseにすれば通知されません。（SendTitle・SoundSEの設定も無視されます。） ※基本的には弄るべきではありません。
 #
 VersionCheck: true
 SendTitle: false
+SoundSE: false
+SoundSEName: ENTITY_WITHER_SPAWN
 DemoMode: false
 
 NotificationMode: true
